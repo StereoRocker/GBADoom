@@ -27,88 +27,70 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Mission begin melt/wipe screen special effect.
+ *      Startup and quit functions. Handles signals, inits the
+ *      memory management, then calls D_DoomMain. Also contains
+ *      I_Init which does other system-related startup stuff.
  *
  *-----------------------------------------------------------------------------
  */
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
-#include "z_zone.h"
 #include "doomdef.h"
+#include "d_main.h"
+#include "m_fixed.h"
+#include "i_system.h"
 #include "i_video.h"
-#include "v_video.h"
+#include "z_zone.h"
+#include "lprintf.h"
 #include "m_random.h"
-#include "f_wipe.h"
+#include "doomstat.h"
+#include "g_game.h"
+#include "m_misc.h"
+#include "i_sound.h"
+#include "i_main.h"
+#include "lprintf.h"
 #include "global_data.h"
 
-#ifdef __arm__
-    //#include <gba.h>
-#endif
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-//
-// SCREEN WIPE PACKAGE
-//
+/* Most of the following has been rewritten by Lee Killough
+ *
+ * I_GetTime
+ * killough 4/13/98: Make clock rate adjustable by scale factor
+ * cphipps - much made static
+ */
 
-int wipe_StartScreen(void)
+void I_Init(void)
 {
-    _g->wipe_tick = 0;
-    return 0;
+    if (!(nomusicparm && nosfxparm))
+        I_InitSound();
 }
 
-int wipe_EndScreen(void)
+static void PrintVer(void)
 {
-    _g->wipe_tick = 0;
-    return 0;
+    char vbuf[24];
+    lprintf(LO_INFO,"%s",I_GetVersionString(vbuf,200));
 }
 
-// killough 3/5/98: reformatted and cleaned up
-int wipe_ScreenWipe(int ticks)
+int c_main(uint8_t* fb)
 {
-    unsigned int wipepos;
+    /* cphipps - call to video specific startup code */
+    I_PreInitGraphics();
 
-    //Do a pageflip on the 16th tick.
-    boolean pageflip = (_g->wipe_tick < 16) &&  (_g->wipe_tick + ticks >= 16);
+    PrintVer();
 
-    _g->wipe_tick += ticks;
+    Z_Init();                  /* 1/18/98 killough: start up memory stuff first */
 
-    int wipeticks = _g->wipe_tick;
+    InitGlobals();
 
-    if(wipeticks >= 32)
-    {
-        wipeticks = 32;
-        wipepos = 0;
-    }
-    else if(wipeticks < 16)
-    {
-        wipepos = wipeticks;
-    }
-    else //16->31
-    {
-        wipepos = 31 - wipeticks;
-    }
-
-//#ifdef __arm__
-#if 0
-    REG_BLDCNT = 0xc4;
-    REG_BLDY = wipepos;
-
-    VBlankIntrWait();
-#endif
-
-    if(pageflip)
-         I_FinishUpdate();
-
-    if(wipeticks >= 32)
-    {
-#ifdef __arm__
-        //REG_BLDCNT = 0;
-#endif
-        return 1;
-    }
-
+    D_DoomMain ();
     return 0;
 }

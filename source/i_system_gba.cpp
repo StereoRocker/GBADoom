@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <cstring>
 
+#include "pico/stdlib.h"
+
 //#define __arm__
 
 #ifdef __arm__
@@ -20,6 +22,7 @@ extern "C"
 
 #include "i_system_e32.h"
 
+/*
 #include "lprintf.h"
 
 #include <gba.h>
@@ -41,7 +44,7 @@ extern "C"
 
 #define REG_WAITCNT	*((vu16 *)(0x4000204))
 
-
+*/
 //**************************************************************************************
 
 
@@ -51,13 +54,14 @@ extern "C"
 
 void VBlankCallback()
 {
-    mmVBlank();
-    mmFrame();
+    //mmVBlank();
+    //mmFrame();
 }
 
 
 void I_InitScreen_e32()
 {
+    /*
     irqInit();
 
     irqSet( IRQ_VBLANK, VBlankCallback );
@@ -74,6 +78,7 @@ void I_InitScreen_e32()
 
     // cascade into tm3
     REG_TM3CNT_H = TM_CASCADE | TM_ENABLE;
+    */
 }
 
 //**************************************************************************************
@@ -94,139 +99,139 @@ void I_StartWServEvents_e32()
 
 void I_PollWServEvents_e32()
 {
-    scanKeys();
+    // scanKeys();
 
-    u16 key_down = keysDown();
+    // u16 key_down = keysDown();
 
-    event_t ev;
+    // event_t ev;
 
-    if(key_down)
-    {
-        ev.type = ev_keydown;
+    // if(key_down)
+    // {
+    //     ev.type = ev_keydown;
 
-        if(key_down & KEY_UP)
-        {
-            ev.data1 = KEYD_UP;
-            D_PostEvent(&ev);
-        }
-        else if(key_down & KEY_DOWN)
-        {
-            ev.data1 = KEYD_DOWN;
-            D_PostEvent(&ev);
-        }
+    //     if(key_down & KEY_UP)
+    //     {
+    //         ev.data1 = KEYD_UP;
+    //         D_PostEvent(&ev);
+    //     }
+    //     else if(key_down & KEY_DOWN)
+    //     {
+    //         ev.data1 = KEYD_DOWN;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_down & KEY_LEFT)
-        {
-            ev.data1 = KEYD_LEFT;
-            D_PostEvent(&ev);
-        }
-        else if(key_down & KEY_RIGHT)
-        {
-            ev.data1 = KEYD_RIGHT;
-            D_PostEvent(&ev);
-        }
+    //     if(key_down & KEY_LEFT)
+    //     {
+    //         ev.data1 = KEYD_LEFT;
+    //         D_PostEvent(&ev);
+    //     }
+    //     else if(key_down & KEY_RIGHT)
+    //     {
+    //         ev.data1 = KEYD_RIGHT;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_down & KEY_SELECT)
-        {
-            ev.data1 = KEYD_SELECT;
-            D_PostEvent(&ev);
-        }
+    //     if(key_down & KEY_SELECT)
+    //     {
+    //         ev.data1 = KEYD_SELECT;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_down & KEY_START)
-        {
-            ev.data1 = KEYD_START;
-            D_PostEvent(&ev);
-        }
+    //     if(key_down & KEY_START)
+    //     {
+    //         ev.data1 = KEYD_START;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_down & KEY_A)
-        {
-            ev.data1 = KEYD_A;
-            D_PostEvent(&ev);
-        }
+    //     if(key_down & KEY_A)
+    //     {
+    //         ev.data1 = KEYD_A;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_down & KEY_B)
-        {
-            ev.data1 = KEYD_B;
-            D_PostEvent(&ev);
-        }
+    //     if(key_down & KEY_B)
+    //     {
+    //         ev.data1 = KEYD_B;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_down & KEY_L)
-        {
-            ev.data1 = KEYD_L;
-            D_PostEvent(&ev);
-        }
+    //     if(key_down & KEY_L)
+    //     {
+    //         ev.data1 = KEYD_L;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_down & KEY_R)
-        {
-            ev.data1 = KEYD_R;
-            D_PostEvent(&ev);
-        }
-    }
+    //     if(key_down & KEY_R)
+    //     {
+    //         ev.data1 = KEYD_R;
+    //         D_PostEvent(&ev);
+    //     }
+    // }
 
-    u16 key_up = keysUp();
+    // u16 key_up = keysUp();
 
-    if(key_up)
-    {
-        ev.type = ev_keyup;
+    // if(key_up)
+    // {
+    //     ev.type = ev_keyup;
 
-        if(key_up & KEY_UP)
-        {
-            ev.data1 = KEYD_UP;
-            D_PostEvent(&ev);
-        }
-        else if(key_up & KEY_DOWN)
-        {
-            ev.data1 = KEYD_DOWN;
-            D_PostEvent(&ev);
-        }
+    //     if(key_up & KEY_UP)
+    //     {
+    //         ev.data1 = KEYD_UP;
+    //         D_PostEvent(&ev);
+    //     }
+    //     else if(key_up & KEY_DOWN)
+    //     {
+    //         ev.data1 = KEYD_DOWN;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_up & KEY_LEFT)
-        {
-            ev.data1 = KEYD_LEFT;
-            D_PostEvent(&ev);
-        }
-        else if(key_up & KEY_RIGHT)
-        {
-            ev.data1 = KEYD_RIGHT;
-            D_PostEvent(&ev);
-        }
+    //     if(key_up & KEY_LEFT)
+    //     {
+    //         ev.data1 = KEYD_LEFT;
+    //         D_PostEvent(&ev);
+    //     }
+    //     else if(key_up & KEY_RIGHT)
+    //     {
+    //         ev.data1 = KEYD_RIGHT;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_up & KEY_SELECT)
-        {
-            ev.data1 = KEYD_SELECT;
-            D_PostEvent(&ev);
-        }
+    //     if(key_up & KEY_SELECT)
+    //     {
+    //         ev.data1 = KEYD_SELECT;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_up & KEY_START)
-        {
-            ev.data1 = KEYD_START;
-            D_PostEvent(&ev);
-        }
+    //     if(key_up & KEY_START)
+    //     {
+    //         ev.data1 = KEYD_START;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_up & KEY_A)
-        {
-            ev.data1 = KEYD_A;
-            D_PostEvent(&ev);
-        }
+    //     if(key_up & KEY_A)
+    //     {
+    //         ev.data1 = KEYD_A;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_up & KEY_B)
-        {
-            ev.data1 = KEYD_B;
-            D_PostEvent(&ev);
-        }
+    //     if(key_up & KEY_B)
+    //     {
+    //         ev.data1 = KEYD_B;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_up & KEY_L)
-        {
-            ev.data1 = KEYD_L;
-            D_PostEvent(&ev);
-        }
+    //     if(key_up & KEY_L)
+    //     {
+    //         ev.data1 = KEYD_L;
+    //         D_PostEvent(&ev);
+    //     }
 
-        if(key_up & KEY_R)
-        {
-            ev.data1 = KEYD_R;
-            D_PostEvent(&ev);
-        }
-    }
+    //     if(key_up & KEY_R)
+    //     {
+    //         ev.data1 = KEYD_R;
+    //         D_PostEvent(&ev);
+    //     }
+    // }
 }
 
 //**************************************************************************************
@@ -238,19 +243,24 @@ void I_ClearWindow_e32()
 
 //**************************************************************************************
 
+extern uint8_t* frame;
+
 unsigned short* I_GetBackBuffer()
 {
+    /*
     if(REG_DISPCNT & DCNT_PAGE)
         return (unsigned short*)VID_PAGE1;
 
     return (unsigned short*)VID_PAGE2;
+    */
+   return (unsigned short*)frame;
 }
 
 //**************************************************************************************
 
 void I_CreateWindow_e32()
 {
-
+    /*
     //Bit5 = unlocked vram at h-blank.
     SetMode(MODE_4 | BG2_ENABLE | BIT(5));
 
@@ -265,7 +275,7 @@ void I_CreateWindow_e32()
     memset(bb, 0, 240*160);
 
     I_FinishUpdate_e32(NULL, NULL, 0, 0);
-
+    */
 }
 
 //**************************************************************************************
@@ -279,13 +289,14 @@ void I_CreateBackBuffer_e32()
 
 void I_FinishUpdate_e32(const byte* srcBuffer, const byte* pallete, const unsigned int width, const unsigned int height)
 {
-    REG_DISPCNT ^= DCNT_PAGE;
+    //REG_DISPCNT ^= DCNT_PAGE;
 }
 
 //**************************************************************************************
 
 void I_SetPallete_e32(const byte* pallete)
 {
+    /*
     unsigned short* pal_ram = (unsigned short*)0x5000000;
 
     for(int i = 0; i< 256; i++)
@@ -296,6 +307,7 @@ void I_SetPallete_e32(const byte* pallete)
 
         pal_ram[i] = RGB5(r >> 3, g >> 3, b >> 3);
     }
+    */
 }
 
 //**************************************************************************************
@@ -327,7 +339,8 @@ void I_ProcessKeyEvents()
 
 void I_Error (const char *error, ...)
 {
-    consoleDemoInit();
+    
+    //consoleDemoInit();
 
     char msg[MAX_MESSAGE_SIZE];
 
@@ -342,7 +355,8 @@ void I_Error (const char *error, ...)
 
     while(true)
     {
-        VBlankIntrWait();
+        __breakpoint();
+        //VBlankIntrWait();
     }
 }
 
