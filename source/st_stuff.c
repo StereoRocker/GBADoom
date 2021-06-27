@@ -481,6 +481,7 @@ static void ST_loadGraphics(boolean doload)
     // Load the numbers, tall and short
     for (i=0;i<10;i++)
     {
+        // CHANGEME:
         //sprintf(namebuf, "STTNUM%d", i);
 		sprintf(namebuf, "STGANUM%d", i); //Special GBA Doom II Red Numbers ~Kippykip
         _g->tallnum[i] = (const patch_t *) W_CacheLumpName(namebuf);

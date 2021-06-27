@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/../include",
                 "${env:PICO_SDK_PATH}/**",
                 "/home/stereo/pico/pico-sdk/src/rp2_common/pico_stdio/include"
             ],

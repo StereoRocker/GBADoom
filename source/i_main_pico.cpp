@@ -27,8 +27,28 @@
 ILI9341* display;
 
 uint8_t* frame;
+uint16_t frame_palette[256];
 
 extern "C" void c_main(uint8_t* fb);
+
+void render_fb(void)
+{
+    // Here's hoping the stack has 480 bytes free for me lmao
+    uint16_t line[240];
+
+    // For each line
+    for (int i = 0; i < 160; i++)
+    {
+        // For each pixel on the line
+        for (int j = 0; j < 240; j++)
+        {
+            line[j] = frame_palette[frame[(i*240) + j]];
+        }
+
+        // Output the line to display
+        display->plot_block(0, i, 239, i+1, line, 240);
+    }
+}
 
 int main()
 {
@@ -47,12 +67,12 @@ int main()
     // Initialise ILI9341 display
     display = new ILI9341(SPI_PORT, PIN_MISO, PIN_MOSI, PIN_SCK,
                             PIN_CS, PIN_DC, PIN_RST,
-                            240, 320, 0,
+                            320, 240, 90,
                             62.5 * 1000 * 1000);
 
     // Set up static framebuffer
-    frame = (uint8_t*)malloc(320*240);
-    memset(frame, 0, 320*240);
+    frame = (uint8_t*)malloc(240*160);
+    memset(frame, 0, 240*160);
 
     c_main(frame);
     

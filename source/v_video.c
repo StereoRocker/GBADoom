@@ -102,6 +102,9 @@ void V_DrawPatch(int x, int y, int scrn, const patch_t* patch)
     byte* byte_topleft = (byte*)_g->screens[scrn].data;
     const int byte_pitch = (SCREENPITCH * 2);
 
+    // StereoRocker: This might eliminate pixel doubling? Currently disabled.
+    //const int byte_pitch = (SCREENPITCH);
+
     const int left = ( x * DX ) >> FRACBITS;
     const int right =  ((x + patch->width) *  DX) >> FRACBITS;
     const int bottom = ((y + patch->height) * DY) >> FRACBITS;
@@ -230,6 +233,9 @@ void V_FillRect(int x, int y, int width, int height, byte colour)
     {
         BlockSet(dest, colour, width);
         dest += (SCREENPITCH << 1);
+
+        // StereoRocker: This might eliminate pixel doubling? Currently disabled.
+        //dest += SCREENPITCH;
     }
 }
 

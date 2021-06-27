@@ -141,9 +141,10 @@ void R_InitBuffer()
 
 
     //Copy lookup tables to fast VRAM.
-    BlockCopy((void*)xtoviewangle_vram, xtoviewangle, sizeof(xtoviewangle));
+    //StereoRocker: All RAM is the same speed on the RP2040 AFAIK.
+    //BlockCopy((void*)xtoviewangle_vram, xtoviewangle, sizeof(xtoviewangle));
 
-    BlockCopy((void*)yslope_vram, yslope, sizeof(yslope));
+    //BlockCopy((void*)yslope_vram, yslope, sizeof(yslope));
 
-    BlockCopy((void*)distscale_vram, distscale, sizeof(distscale));
+    //BlockCopy((void*)distscale_vram, distscale, sizeof(distscale));
 }

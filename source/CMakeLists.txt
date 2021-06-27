@@ -17,9 +17,13 @@ project(picodoom C CXX)
 # Initialise the Pico SDK
 pico_sdk_init()
 
-# Add executable. Default name is the project name, version 0.1
+# Do not panic on OOM
+add_definitions(-DPICO_MALLOC_PANIC=0)
 
+# Include the includes!
 include_directories(../include)
+
+# Add executable. Default name is the project name, version 0.1
 
 add_executable(picodoom
         i_main_pico.cpp

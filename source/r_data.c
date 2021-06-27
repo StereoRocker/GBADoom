@@ -158,6 +158,9 @@ static const texture_t* R_LoadTexture(int texture_num)
         char pname[8];
         strncpy(pname, (const char*)&pnames[mpatch->patch * 8], 8);
 
+        // StereoRocker: pname was not being converted to uppercase, resulting in lookup failure
+        strupr(pname);
+
         patch->patch = (const patch_t*)W_CacheLumpName(pname);
     }
 

@@ -68,6 +68,8 @@
 #include "gba_functions.h"
 
 
+#include "pico/stdlib.h"
+
 //#define static
 
 //*****************************************
@@ -76,50 +78,57 @@
 //in IWRAM.
 //*****************************************
 
-#ifndef __arm__
-static byte vram1_spare[2560];
-static byte vram2_spare[2560];
-static byte vram3_spare[1024];
-#else
-    #define vram1_spare ((byte*)0x6000000+0x9600)
-    #define vram2_spare ((byte*)0x600A000+0x9600)
-    #define vram3_spare ((byte*)0x7000000)
-#endif
+//#ifndef __arm__
+// #if 1
+// static byte vram1_spare[2560];
+// static byte vram2_spare[2560];
+// static byte vram3_spare[1024];
+// #else
+//     #define vram1_spare ((byte*)0x6000000+0x9600)
+//     #define vram2_spare ((byte*)0x600A000+0x9600)
+//     #define vram3_spare ((byte*)0x7000000)
+// #endif
 
 //Stuff alloc'd in OAM memory.
 
-//512 bytes.
-static unsigned int* columnCacheEntries = (unsigned int*)&vram3_spare[0];
+// StereoRocker: No more wasting RAM on emulating VRAM that doesn't exist!
 
-//240 bytes.
-short* floorclip = (short*)&vram3_spare[512];
+// //512 bytes.
+// static unsigned int* columnCacheEntries = (unsigned int*)&vram3_spare[0];
+static unsigned int columnCacheEntries[512];
 
-//240 bytes.
-short* ceilingclip = (short*)&vram3_spare[512+240];
+// //240 bytes.
+// short* floorclip = (short*)&vram3_spare[512];
+short floorclip[240];
+
+// //240 bytes.
+// short* ceilingclip = (short*)&vram3_spare[512+240];
+short ceilingclip[240];
 
 
 
-//Stuff alloc'd in VRAM1 memory.
+// //Stuff alloc'd in VRAM1 memory.
 
-//580 bytes
-const fixed_t* yslope_vram = (const fixed_t*)&vram1_spare[0];
+// //580 bytes
+// const fixed_t* yslope_vram = (const fixed_t*)&vram1_spare[0];
 
-//480 bytes
-const fixed_t* distscale_vram = (const fixed_t*)&vram1_spare[580];
+// //480 bytes
+// const fixed_t* distscale_vram = (const fixed_t*)&vram1_spare[580];
 
-//484 bytes.
-const angle_t* xtoviewangle_vram = (const angle_t*)&vram1_spare[580+480];
+// //484 bytes.
+// const angle_t* xtoviewangle_vram = (const angle_t*)&vram1_spare[580+480];
 
-#define yslope yslope_vram
-#define distscale distscale_vram
-#define xtoviewangle xtoviewangle_vram
+// #define yslope yslope_vram
+// #define distscale distscale_vram
+// #define xtoviewangle xtoviewangle_vram
 
 //*****************************************
 //Column cache stuff.
 //GBA has 16kb of Video Memory for columns
 //*****************************************
 
-#ifndef __arm__
+//#ifndef __arm__
+#if 1
 static byte columnCache[128*128];
 #else
     #define columnCache ((byte*)0x6014000)
@@ -261,7 +270,8 @@ static const fixed_t skyiscale = (FRACUNIT*200)/((SCREENHEIGHT-ST_HEIGHT)+16);
 // will mirror to the upper 8 bits too.
 // it saves an OR and Shift per pixel.
 //********************************************
-#ifdef __arm__
+//#ifdef __arm__
+#if 0
     typedef byte pixel;
 #else
     typedef unsigned short pixel;
@@ -3249,7 +3259,8 @@ static int I_GetTime_e32(void)
     return thistimereply;
 }
 
-
+// I_GetTime
+// returns time in tics
 int I_GetTime(void)
 {
     int thistimereply;
@@ -3260,7 +3271,16 @@ int I_GetTime(void)
 
     thistimereply = (int)((double)now / ((double)CLOCKS_PER_SEC / (double)TICRATE));
 #else
-    thistimereply = I_GetTime_e32();
+    //thistimereply = I_GetTime_e32();
+    static uint64_t basetime = 0;
+
+    uint64_t us = to_us_since_boot(get_absolute_time());
+    if (!basetime)
+        basetime = us;
+    
+    thistimereply = ((us-basetime)/(1000/TICRATE));
+
+    return thistimereply;
 #endif
 
     if (thistimereply < _g->lasttimereply)

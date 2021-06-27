@@ -146,14 +146,14 @@ static int PUREFUNC FindLumpByName(const char* name, const filelump_t** lump)
             //On ARM, unaligned loads are not fine but since it
             //doesn't have a 64bit load, the compiler will generate
             //32 bit loads. These vars are 32 aligned.
-
+         
             int_64_t nameint2 = *(int_64_t*)fileinfo[i].name;
 
             if(nameint == nameint2)
             {
                 *lump = &fileinfo[i];
                 return i;
-            }
+            }          
         }
     }
 
@@ -203,7 +203,7 @@ static const filelump_t* PUREFUNC FindLumpByNum(int num)
 // between different resources such as flats, sprites, colormaps
 //
 
-int PUREFUNC W_CheckNumForName(const char *name)
+int /*PUREFUNC*/ W_CheckNumForName(const char *name)
 {
     const filelump_t* lump = NULL;
 

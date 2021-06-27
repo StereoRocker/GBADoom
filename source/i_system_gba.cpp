@@ -287,27 +287,31 @@ void I_CreateBackBuffer_e32()
 
 //**************************************************************************************
 
+void render_fb();
+
 void I_FinishUpdate_e32(const byte* srcBuffer, const byte* pallete, const unsigned int width, const unsigned int height)
 {
     //REG_DISPCNT ^= DCNT_PAGE;
+    render_fb();
 }
 
 //**************************************************************************************
 
+extern uint16_t frame_palette[256];
+
 void I_SetPallete_e32(const byte* pallete)
 {
-    /*
-    unsigned short* pal_ram = (unsigned short*)0x5000000;
 
     for(int i = 0; i< 256; i++)
     {
-        unsigned int r = *pallete++;
-        unsigned int g = *pallete++;
-        unsigned int b = *pallete++;
+        byte r = *pallete++;
+        byte g = *pallete++;
+        byte b = *pallete++;
 
-        pal_ram[i] = RGB5(r >> 3, g >> 3, b >> 3);
+        frame_palette[i] = ((r & 0xf8) << 8 | (g & 0xfc) << 3 | b >> 3);
+        uint8_t color_big[2] = {(uint8_t)(frame_palette[i] >> 8), (uint8_t)(frame_palette[i] & 0xFF)};
+        frame_palette[i] = *(uint16_t*)(color_big);
     }
-    */
 }
 
 //**************************************************************************************
