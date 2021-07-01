@@ -1,0 +1,13 @@
+{
+    "folders": [
+        {
+            "path": "source"
+        },
+        {
+            "path": "include"
+        },
+        {
+            "path": "../../../src/MG21DOOM-master/DoomMG21/Doom"
+        }
+    ]
+}

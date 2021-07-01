@@ -12,6 +12,8 @@
 
 #include "ili9341.hpp"
 
+#include "hardware/adc.h"
+
 // ILI9341 pin definitions:
 // We are going to use SPI 0, and allocate it to the following GPIO pins.
 // Pins can be changed, see the GPIO function select table in the datasheet
@@ -26,7 +28,7 @@
 
 ILI9341* display;
 
-uint8_t* frame;
+uint8_t frame[240*160];
 uint16_t frame_palette[256];
 
 extern "C" void c_main(uint8_t* fb);
@@ -50,6 +52,15 @@ void render_fb(void)
     }
 }
 
+#define ADC_AX   0
+#define PIN_AX   26
+
+#define ADC_AY   1
+#define PIN_AY   27
+
+#define PIN_SEL  28
+#define PIN_FIRE 29
+
 int main()
 {
 
@@ -71,8 +82,20 @@ int main()
                             62.5 * 1000 * 1000);
 
     // Set up static framebuffer
-    frame = (uint8_t*)malloc(240*160);
     memset(frame, 0, 240*160);
+
+    // Set up controls
+    adc_init();
+    adc_gpio_init(PIN_AX);
+    adc_gpio_init(PIN_AY);
+
+    gpio_init(PIN_SEL);
+    gpio_pull_up(PIN_SEL);
+    gpio_set_dir(PIN_SEL, GPIO_IN);
+
+    gpio_init(PIN_FIRE);
+    gpio_pull_up(PIN_FIRE);
+    gpio_set_dir(PIN_FIRE, GPIO_IN);
 
     c_main(frame);
     

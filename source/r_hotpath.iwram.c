@@ -3274,7 +3274,7 @@ int I_GetTime(void)
     //thistimereply = I_GetTime_e32();
     static uint64_t basetime = 0;
 
-    uint64_t us = to_us_since_boot(get_absolute_time());
+    uint64_t us = to_ms_since_boot(get_absolute_time());
     if (!basetime)
         basetime = us;
     

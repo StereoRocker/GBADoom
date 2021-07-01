@@ -105,6 +105,7 @@ target_link_libraries(picodoom pico_stdlib)
 # Add any user requested libraries
 target_link_libraries(picodoom
         hardware_spi
+        hardware_adc
         )
 
 pico_add_extra_outputs(picodoom)

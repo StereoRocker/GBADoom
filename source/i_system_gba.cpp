@@ -97,141 +97,59 @@ void I_StartWServEvents_e32()
 
 //**************************************************************************************
 
+#include "hardware/adc.h"
+
+#define ADC_AX   0
+#define PIN_AX   26
+
+#define ADC_AY   1
+#define PIN_AY   27
+
+#define PIN_SEL  28
+#define PIN_FIRE 29
+
 void I_PollWServEvents_e32()
 {
-    // scanKeys();
+    bool left, right, up, down, fire, sel;
 
-    // u16 key_down = keysDown();
+    adc_select_input(ADC_AX);
+    uint adc_x_raw = adc_read();
+    adc_select_input(ADC_AY);
+    uint adc_y_raw = adc_read();
 
-    // event_t ev;
+    fire = !gpio_get(PIN_FIRE);
+    sel = !gpio_get(PIN_SEL);
 
-    // if(key_down)
-    // {
-    //     ev.type = ev_keydown;
+    left = (adc_x_raw < 600);
+    right = (adc_x_raw > 4000);
+    up = (adc_y_raw > 4000);
+    down = (adc_y_raw < 600);
 
-    //     if(key_down & KEY_UP)
-    //     {
-    //         ev.data1 = KEYD_UP;
-    //         D_PostEvent(&ev);
-    //     }
-    //     else if(key_down & KEY_DOWN)
-    //     {
-    //         ev.data1 = KEYD_DOWN;
-    //         D_PostEvent(&ev);
-    //     }
+    event_t ev;
 
-    //     if(key_down & KEY_LEFT)
-    //     {
-    //         ev.data1 = KEYD_LEFT;
-    //         D_PostEvent(&ev);
-    //     }
-    //     else if(key_down & KEY_RIGHT)
-    //     {
-    //         ev.data1 = KEYD_RIGHT;
-    //         D_PostEvent(&ev);
-    //     }
+    ev.data1 = KEYD_UP;
+    ev.type = up ? ev_keydown : ev_keyup;
+    D_PostEvent(&ev);
 
-    //     if(key_down & KEY_SELECT)
-    //     {
-    //         ev.data1 = KEYD_SELECT;
-    //         D_PostEvent(&ev);
-    //     }
+    ev.data1 = KEYD_DOWN;
+    ev.type = down ? ev_keydown : ev_keyup;
+    D_PostEvent(&ev);
 
-    //     if(key_down & KEY_START)
-    //     {
-    //         ev.data1 = KEYD_START;
-    //         D_PostEvent(&ev);
-    //     }
+    ev.data1 = KEYD_LEFT;
+    ev.type = left ? ev_keydown : ev_keyup;
+    D_PostEvent(&ev);
 
-    //     if(key_down & KEY_A)
-    //     {
-    //         ev.data1 = KEYD_A;
-    //         D_PostEvent(&ev);
-    //     }
+    ev.data1 = KEYD_RIGHT;
+    ev.type = right ? ev_keydown : ev_keyup;
+    D_PostEvent(&ev);
 
-    //     if(key_down & KEY_B)
-    //     {
-    //         ev.data1 = KEYD_B;
-    //         D_PostEvent(&ev);
-    //     }
+    ev.data1 = KEYD_B;
+    ev.type = fire ? ev_keydown : ev_keyup;
+    D_PostEvent(&ev);
 
-    //     if(key_down & KEY_L)
-    //     {
-    //         ev.data1 = KEYD_L;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_down & KEY_R)
-    //     {
-    //         ev.data1 = KEYD_R;
-    //         D_PostEvent(&ev);
-    //     }
-    // }
-
-    // u16 key_up = keysUp();
-
-    // if(key_up)
-    // {
-    //     ev.type = ev_keyup;
-
-    //     if(key_up & KEY_UP)
-    //     {
-    //         ev.data1 = KEYD_UP;
-    //         D_PostEvent(&ev);
-    //     }
-    //     else if(key_up & KEY_DOWN)
-    //     {
-    //         ev.data1 = KEYD_DOWN;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_up & KEY_LEFT)
-    //     {
-    //         ev.data1 = KEYD_LEFT;
-    //         D_PostEvent(&ev);
-    //     }
-    //     else if(key_up & KEY_RIGHT)
-    //     {
-    //         ev.data1 = KEYD_RIGHT;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_up & KEY_SELECT)
-    //     {
-    //         ev.data1 = KEYD_SELECT;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_up & KEY_START)
-    //     {
-    //         ev.data1 = KEYD_START;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_up & KEY_A)
-    //     {
-    //         ev.data1 = KEYD_A;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_up & KEY_B)
-    //     {
-    //         ev.data1 = KEYD_B;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_up & KEY_L)
-    //     {
-    //         ev.data1 = KEYD_L;
-    //         D_PostEvent(&ev);
-    //     }
-
-    //     if(key_up & KEY_R)
-    //     {
-    //         ev.data1 = KEYD_R;
-    //         D_PostEvent(&ev);
-    //     }
-    // }
+    ev.data1 = KEYD_A;
+    ev.type = sel ? ev_keydown : ev_keyup;
+    D_PostEvent(&ev);
 }
 
 //**************************************************************************************
@@ -243,7 +161,7 @@ void I_ClearWindow_e32()
 
 //**************************************************************************************
 
-extern uint8_t* frame;
+extern uint8_t frame[];
 
 unsigned short* I_GetBackBuffer()
 {
