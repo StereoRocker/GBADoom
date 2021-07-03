@@ -47,9 +47,9 @@ void render_fb(void)
     for (int i = 0; i < 160; i++)
     {
         // For each pixel on the line
-        for (int j = 0; j < 320; j++)
+        for (int j = 0; j < 240; j++)
         {
-            line[j] = frame_palette[frame[(i*320) + j]];
+            line[j] = frame_palette[frame[(i*240) + j]];
         }
 
         // Output the line to display
