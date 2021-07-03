@@ -40,7 +40,7 @@ inline static CONSTFUNC int IDiv32 (int a, int b)
 
 inline static void BlockCopy(void* dest, const void* src, const unsigned int len)
 {
-    memcpy(dest, src, len);
+    memcpy(dest, src, len & 0xFFFFFFFC);
 }
 
 inline static void CpuBlockCopy(void* dest, const void* src, const unsigned int len)
@@ -51,7 +51,7 @@ inline static void CpuBlockCopy(void* dest, const void* src, const unsigned int 
 
 inline static void BlockSet(void* dest, volatile unsigned int val, const unsigned int len)
 {
-    memset(dest, val, len);
+    memset(dest, val, len & 0xFFFFFFFC);
 }
 
 inline static void ByteCopy(byte* dest, const byte* src, unsigned int count)
