@@ -28,8 +28,13 @@
 
 ILI9341* display;
 
-uint8_t frame[240*160];
+// Keeping the framebuffer of 320*240 despite not running at that res now
+uint8_t frame[320*240];
 uint16_t frame_palette[256];
+
+const int Y_OFFSET = ((240 - 160) / 2);
+const int X_OFFSET = ((320 - 240) / 2);
+const int X_LIMIT  = (X_OFFSET + 239);
 
 extern "C" void c_main(uint8_t* fb);
 
@@ -42,13 +47,13 @@ void render_fb(void)
     for (int i = 0; i < 160; i++)
     {
         // For each pixel on the line
-        for (int j = 0; j < 240; j++)
+        for (int j = 0; j < 320; j++)
         {
-            line[j] = frame_palette[frame[(i*240) + j]];
+            line[j] = frame_palette[frame[(i*320) + j]];
         }
 
         // Output the line to display
-        display->plot_block(0, i, 239, i+1, line, 240);
+        display->plot_block(X_OFFSET , i+Y_OFFSET, X_LIMIT, i+Y_OFFSET+1, line, 240);
     }
 }
 

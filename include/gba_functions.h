@@ -40,8 +40,7 @@ inline static CONSTFUNC int IDiv32 (int a, int b)
 
 inline static void BlockCopy(void* dest, const void* src, const unsigned int len)
 {
-
-    memcpy(dest, src, len & 0xfffffffc);
+    memcpy(dest, src, len & 0xFFFFFFFC);
 }
 
 inline static void CpuBlockCopy(void* dest, const void* src, const unsigned int len)
@@ -52,8 +51,7 @@ inline static void CpuBlockCopy(void* dest, const void* src, const unsigned int 
 
 inline static void BlockSet(void* dest, volatile unsigned int val, const unsigned int len)
 {
-
-    memset(dest, val, len & 0xfffffffc);
+    memset(dest, val, len & 0xFFFFFFFC);
 }
 
 inline static void ByteCopy(byte* dest, const byte* src, unsigned int count)
@@ -99,7 +97,8 @@ inline static void LoadSRAM(byte* eeprom, unsigned int size, unsigned int offset
 #endif
 }
 
-//Cheap mul by 120. Not sure if faster.
-#define ScreenYToOffset(x) ((x << 7) - (x << 3))
+// Mul by SCREENWIDTH
+
+#define ScreenYToOffset(x) (SCREENWIDTH * (x))
 
 #endif // GBA_FUNCTIONS_H

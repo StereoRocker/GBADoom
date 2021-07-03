@@ -67,7 +67,7 @@ typedef struct {
 
 typedef struct
 {
-  unsigned short *byte_topleft;
+  unsigned char *byte_topleft;
 } draw_vars_t;
 
 extern draw_vars_t drawvars;

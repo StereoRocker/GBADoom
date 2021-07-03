@@ -33,9 +33,7 @@
  *
  *-----------------------------------------------------------------------------*/
 
-//This is to keep the codesize under control.
-//This whole file needs to fit within IWRAM.
-#pragma GCC optimize ("Os")
+#pragma GCC optimize ("Ofast")  // we need to compile this code to be as fast as possible.
 
 
 #ifdef HAVE_CONFIG_H
@@ -99,11 +97,11 @@ static unsigned int columnCacheEntries[512];
 
 // //240 bytes.
 // short* floorclip = (short*)&vram3_spare[512];
-short floorclip[240];
+short floorclip[SCREENWIDTH];
 
 // //240 bytes.
 // short* ceilingclip = (short*)&vram3_spare[512+240];
-short ceilingclip[240];
+short ceilingclip[SCREENWIDTH];
 
 
 
@@ -271,7 +269,7 @@ static const fixed_t skyiscale = (FRACUNIT*200)/((SCREENHEIGHT-ST_HEIGHT)+16);
 // it saves an OR and Shift per pixel.
 //********************************************
 //#ifdef __arm__
-#if 0
+#if 1
     typedef byte pixel;
 #else
     typedef unsigned short pixel;
@@ -516,21 +514,14 @@ static const lighttable_t* R_LoadColorMap(int lightlevel)
 //  be used. It has also been used with Wolfenstein 3D.
 //
 
-#pragma GCC push_options
-#pragma GCC optimize ("Ofast")
+
 
 #define COLEXTRABITS 9
 #define COLBITS (FRACBITS + COLEXTRABITS)
 
 inline static void R_DrawColumnPixel(pixel* dest, const byte* source, const byte* colormap, unsigned int frac)
 {
-#ifdef __arm__
     *dest = colormap[source[frac>>COLBITS]];
-#else
-    unsigned int color = colormap[source[frac>>COLBITS]];
-
-    *dest = (color | (color << 8));
-#endif
 }
 
 static void R_DrawColumn (const draw_column_vars_t *dcvars)
@@ -544,7 +535,7 @@ static void R_DrawColumn (const draw_column_vars_t *dcvars)
     const byte *source = dcvars->source;
     const byte *colormap = dcvars->colormap;
 
-    unsigned short* dest = drawvars.byte_topleft + ScreenYToOffset(dcvars->yl) + dcvars->x;
+    pixel* dest = drawvars.byte_topleft + ScreenYToOffset(dcvars->yl) + dcvars->x;
 
     const unsigned int		fracstep = (dcvars->iscale << COLEXTRABITS);
     unsigned int frac = (dcvars->texturemid + (dcvars->yl - centery)*dcvars->iscale) << COLEXTRABITS;
@@ -645,7 +636,7 @@ static void R_DrawFuzzColumn (const draw_column_vars_t *dcvars)
 
     const byte* colormap = &fullcolormap[6*256];
 
-    unsigned short* dest = drawvars.byte_topleft + ScreenYToOffset(dc_yl) + dcvars->x;
+    pixel* dest = drawvars.byte_topleft + ScreenYToOffset(dc_yl) + dcvars->x;
 
     unsigned int fuzzpos = _g->fuzzpos;
 
@@ -661,7 +652,6 @@ static void R_DrawFuzzColumn (const draw_column_vars_t *dcvars)
     _g->fuzzpos = fuzzpos;
 }
 
-#pragma GCC pop_options
 
 
 
@@ -1239,7 +1229,7 @@ static void R_DrawSpan(unsigned int y, unsigned int x1, unsigned int x2, const d
     const byte *source = dsvars->source;
     const byte *colormap = dsvars->colormap;
 
-    unsigned short* dest = drawvars.byte_topleft + ScreenYToOffset(y) + x1;
+    pixel* dest = drawvars.byte_topleft + ScreenYToOffset(y) + x1;
 
     const unsigned int step = dsvars->step;
     unsigned int position = dsvars->position;
@@ -1542,14 +1532,14 @@ static void R_ProjectSprite (mobj_t* thing, int lightlevel)
     vis->x2 = x2 >= SCREENWIDTH ? SCREENWIDTH-1 : x2;
 
 
-    //const fixed_t iscale = FixedDiv (FRACUNIT, xscale);
+    const fixed_t iscale = FixedDiv (FRACUNIT, xscale);
 
     //It simplifies to this.
     //const fixed_t iscale = tz / 60;
 
     //This is a cheap divide by 60.
     //const fixed_t iscale = (((uint_64_t)tz * 0x8889) >> 16) >> 5;
-    const fixed_t iscale = ((tz >> 6) + (tz >> 10)); // -> x/64 + x/1024 is very close to x/60. (Delta -0.4%)
+    //const fixed_t iscale = ((tz >> 6) + (tz >> 10)); // -> x/64 + x/1024 is very close to x/60. (Delta -0.4%)
 
     if (flip)
     {
@@ -2354,6 +2344,7 @@ static void R_StoreWallRange(const int start, const int stop)
     // save sprite clipping info
     if ((ds_p->silhouette & SIL_TOP || maskedtexture) && !ds_p->sprtopclip)
     {
+        // SR: ???
         ByteCopy(_g->lastopening, ceilingclip+start, sizeof(short)*(rw_stopx-start));
         ds_p->sprtopclip = _g->lastopening - start;
         _g->lastopening += rw_stopx - start;
@@ -2361,6 +2352,7 @@ static void R_StoreWallRange(const int start, const int stop)
 
     if ((ds_p->silhouette & SIL_BOTTOM || maskedtexture) && !ds_p->sprbottomclip)
     {
+        // SR: ???
         ByteCopy(_g->lastopening, floorclip+start, sizeof(short)*(rw_stopx-start));
         ds_p->sprbottomclip = _g->lastopening - start;
         _g->lastopening += rw_stopx - start;
@@ -2859,11 +2851,11 @@ static void R_ClearPlanes(void)
     _g->lastopening = _g->openings;
 
     // scale will be unit scale at SCREENWIDTH/2 distance
-    //basexscale = FixedDiv (viewsin,projection);
-    //baseyscale = FixedDiv (viewcos,projection);
+    basexscale = FixedDiv (viewsin,projection);
+    baseyscale = FixedDiv (viewcos,projection);
 
-    basexscale = FixedMul(viewsin,iprojection);
-    baseyscale = FixedMul(viewcos,iprojection);
+    //basexscale = FixedMul(viewsin,iprojection);
+    //baseyscale = FixedMul(viewcos,iprojection);
 }
 
 //
@@ -2889,50 +2881,177 @@ void R_RenderPlayerView (player_t* player)
 
 void V_DrawPatchNoScale(int x, int y, const patch_t* patch)
 {
-    y -= patch->topoffset;
     x -= patch->leftoffset;
+        y -= patch->topoffset;
 
-    byte* desttop = (byte*)_g->screens[0].data;
-    desttop += (ScreenYToOffset(y) << 1) + x;
+        int col = 0;
 
-    unsigned int width = patch->width;
+        const int DX = (MAX_SCREENWIDTH << 16) / 240;
+        const int DXI = (240 << 16) / MAX_SCREENWIDTH;
 
-    for (unsigned int col = 0; col < width; col++, desttop++)
-    {
-        const column_t* column = (const column_t*)((const byte*)patch + patch->columnofs[col]);
+        byte *byte_topleft = (byte*) _g->screens[0].data;
+        const int byte_pitch = MAX_SCREENWIDTH;
 
-        unsigned int odd_addr = (unsigned int)desttop & 1;
+        const int left = (x * DX) >> FRACBITS;
+        const int right = ((x + patch->width) * DX) >> FRACBITS;
+        const int bottom = (y + patch->height);
 
-        byte* desttop_even = (byte*)((unsigned int)desttop & 0xfffffffe);
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
+        for (int dc_x = left; dc_x < right; dc_x++, col += DXI)
         {
-            const byte* source = (const byte*)column + 3;
-            byte* dest = desttop_even + (ScreenYToOffset(column->topdelta) << 1);
 
-            unsigned int count = column->length;
+            if (dc_x < 0)
+                continue;
+            if (dc_x >= MAX_SCREENWIDTH)
+                break;
 
+            int colindex = (col >> 16);
 
-            while (count--)
+            const column_t *column = (const column_t*) ((const byte*) patch + patch->columnofs[colindex]);
+
+            // step through the posts in a column
+            while (column->topdelta != 0xff)
             {
-                unsigned int color = *source++;
-                unsigned short* dest16 = (unsigned short*)dest;
+                const byte *source = (const byte*) column + 3;
+                const int topdelta = column->topdelta;
 
-                unsigned int old = *dest16;
+                int dc_yl = (y + topdelta); // (((y + topdelta) * DY) >> FRACBITS);
+                int dc_yh = (y + topdelta + column->length); //(((y + topdelta + column->length) * DY) >> FRACBITS);
 
-                //The GBA must write in 16bits.
-                if(odd_addr)
-                    *dest16 = (old & 0xff) | (color << 8);
-                else
-                    *dest16 = ((color & 0xff) | (old & 0xff00));
+                // 2021-03-15 next-hack clip to drawing buffer boundary
+                if (dc_yh > SCREENHEIGHT + 1)
+                {
+                    dc_yh = SCREENHEIGHT + 1;
+                }
 
-                dest += 240;
+                if ((dc_yl > SCREENHEIGHT + 1) || (dc_yl > bottom))
+                    break;
+
+                // and also update source
+                if (dc_yl < 0)
+                {
+                    int delta = 0 - dc_yl;
+                    source += delta;
+                    dc_yl = 0;
+                }
+                //
+                int count = (dc_yh - dc_yl);
+                byte *dest = byte_topleft + (dc_yl * byte_pitch) + dc_x;
+
+                // Inner loop that does the actual texture mapping,
+                //  e.g. a DDA-lile scaling.
+                // This is as fast as it gets
+                if (count > 0)
+                {
+                    //   PatchDrawColumn(dest, source, frac, fracstep, count);
+                    unsigned int l = (count >> 4);
+
+                    while (l--)
+                    {
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        //
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        //
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        //
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        *dest = *source++;
+                        dest += MAX_SCREENWIDTH;
+                        //
+                    }
+                    unsigned int r = (count & 15);
+
+                    switch (r)
+                    {
+                        case 15:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 14:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 13:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 12:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 11:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 10:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 9:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 8:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 7:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 6:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 5:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 4:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 3:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 2:
+                            *dest = *source++;
+                            dest += MAX_SCREENWIDTH;
+                            // fall through, no break
+                        case 1:
+                            *dest = *source++;
+                    }
+
+                }
+                column = (const column_t*) ((const byte*) column + column->length + 4);
             }
-
-            column = (const column_t*)((const byte*)column + column->length + 4);
         }
-    }
 }
 
 
