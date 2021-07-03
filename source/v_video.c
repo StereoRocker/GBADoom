@@ -59,22 +59,22 @@ void V_DrawBackground(const char* flatname)
     const byte *src;
     int         lump;
 
-    unsigned short *dest = _g->screens[0].data;
+    unsigned char *dest = _g->screens[0].data;
 
     // killough 4/17/98:
     src = W_CacheLumpNum(lump = _g->firstflat + R_FlatNumForName(flatname));
 
     for(unsigned int y = 0; y < SCREENHEIGHT; y++)
     {
-        for(unsigned int x = 0; x < 240; x+=64)
+        for(unsigned int x = 0; x < MAX_SCREENWIDTH; x+=64)
         {
-            unsigned short* d = &dest[ ScreenYToOffset(y) + (x >> 1)];
+            unsigned char* d = &dest[ ScreenYToOffset(y) + (x >> 1)];
             const byte* s = &src[((y&63) * 64) + (x&63)];
 
             unsigned int len = 64;
 
-            if( (240-x) < 64)
-                len = 240-x;
+            if( (MAX_SCREENWIDTH-x) < 64)
+                len = MAX_SCREENWIDTH-x;
 
             BlockCopy(d, s, len);
         }
@@ -84,7 +84,7 @@ void V_DrawBackground(const char* flatname)
 
 
 /*
- * This function draws at GBA resoulution (ie. not pixel doubled)
+ * This function draws at full resoulution (ie. not pixel doubled)
  * so the st bar and menus don't look like garbage.
  */
 void V_DrawPatch(int x, int y, int scrn, const patch_t* patch)
@@ -94,19 +94,19 @@ void V_DrawPatch(int x, int y, int scrn, const patch_t* patch)
 
     int   col = 0;
 
-    const int   DX  = (240<<16) / 320;
-    const int   DXI = (320<<16) / 240;
+    const int   DX  = (MAX_SCREENWIDTH<<16) / 320;
+    const int   DXI = (320<<16) / MAX_SCREENWIDTH;
     const int   DY  = ((SCREENHEIGHT<<16)+(FRACUNIT-1)) / 200;
     const int   DYI = (200<<16) / SCREENHEIGHT;
 
     byte* byte_topleft = (byte*)_g->screens[scrn].data;
-    const int byte_pitch = (SCREENPITCH * 2);
+    //const int byte_pitch = (SCREENPITCH * 2);
 
     // StereoRocker: This might eliminate pixel doubling? Currently disabled.
-    //const int byte_pitch = (SCREENPITCH);
+    const int byte_pitch = (SCREENPITCH);
 
-    const int left = ( x * DX ) >> FRACBITS;
-    const int right =  ((x + patch->width) *  DX) >> FRACBITS;
+    const int left = (x * DX) >> FRACBITS;
+    const int right = ((x + patch->width) *  DX) >> FRACBITS;
     const int bottom = ((y + patch->height) * DY) >> FRACBITS;
 
 
@@ -117,10 +117,10 @@ void V_DrawPatch(int x, int y, int scrn, const patch_t* patch)
         if(dc_x < 0)
             continue;
 
-        const column_t* column = (const column_t *)((const byte*)patch + patch->columnofs[colindex]);
-
-        if (dc_x >= 240)
+        if (dc_x >= MAX_SCREENWIDTH)
             break;
+
+        const column_t* column = (const column_t *)((const byte*)patch + patch->columnofs[colindex]);
 
         // step through the posts in a column
         while (column->topdelta != 0xff)
@@ -146,28 +146,9 @@ void V_DrawPatch(int x, int y, int scrn, const patch_t* patch)
             // This is as fast as it gets.
             while (count--)
             {
-                unsigned short color = source[frac>>FRACBITS];
+                unsigned char color = source[frac>>FRACBITS];
 
-                //The GBA must write in 16bits.
-                if((unsigned int)dest & 1)
-                {
-                    //Odd addreses, we combine existing pixel with new one.
-                    unsigned short* dest16 = (unsigned short*)(dest - 1);
-
-
-                    unsigned short old = *dest16;
-
-                    *dest16 = (old & 0xff) | (color << 8);
-                }
-                else
-                {
-                    unsigned short* dest16 = (unsigned short*)dest;
-
-                    unsigned short old = *dest16;
-
-                    *dest16 = ((color & 0xff) | (old & 0xff00));
-                }
-
+                *dest = color;
                 dest += byte_pitch;
                 frac += fracstep;
             }
@@ -227,15 +208,15 @@ void V_FillRect(int x, int y, int width, int height, byte colour)
 {
     byte* fb = (byte*)_g->screens[0].data;
 
-    byte* dest = &fb[(ScreenYToOffset(y) << 1) + x];
+    byte* dest = &fb[(ScreenYToOffset(y) /*<< 1*/) + x];
 
     while (height--)
     {
         BlockSet(dest, colour, width);
-        dest += (SCREENPITCH << 1);
+        //dest += (SCREENPITCH << 1);
 
         // StereoRocker: This might eliminate pixel doubling? Currently disabled.
-        //dest += SCREENPITCH;
+        dest += SCREENPITCH;
     }
 }
 
@@ -244,27 +225,9 @@ void V_FillRect(int x, int y, int width, int height, byte colour)
 static void V_PlotPixel(int x, int y, int color)
 {
     byte* fb = (byte*)_g->screens[0].data;
+    byte *dest = &fb[y * MAX_SCREENWIDTH + x];
 
-    byte* dest = &fb[(ScreenYToOffset(y) << 1) + x];
-
-    //The GBA must write in 16bits.
-    if((unsigned int)dest & 1)
-    {
-        //Odd addreses, we combine existing pixel with new one.
-        unsigned short* dest16 = (unsigned short*)(dest - 1);
-
-        unsigned short old = *dest16;
-
-        *dest16 = (old & 0xff) | (color << 8);
-    }
-    else
-    {
-        unsigned short* dest16 = (unsigned short*)dest;
-
-        unsigned short old = *dest16;
-
-        *dest16 = ((color & 0xff) | (old & 0xff00));
-    }
+    *dest = color;
 }
 
 //

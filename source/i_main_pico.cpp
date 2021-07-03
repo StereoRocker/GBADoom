@@ -28,7 +28,7 @@
 
 ILI9341* display;
 
-uint8_t frame[240*160];
+uint8_t frame[320*240];
 uint16_t frame_palette[256];
 
 extern "C" void c_main(uint8_t* fb);

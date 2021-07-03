@@ -84,7 +84,7 @@ void I_StartFrame (void)
 
 boolean I_StartDisplay(void)
 {
-    unsigned short* backbuffer = I_GetBackBuffer();
+    unsigned char* backbuffer = I_GetBackBuffer();
 
     _g->screens[0].data = backbuffer;
 

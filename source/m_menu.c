@@ -1038,7 +1038,7 @@ void M_Drawer (void)
             while ((c = *p) && *p != '\n')
                 p++;
             *p = 0;
-            M_WriteText(120 - M_StringWidth(string)/2, y, string);
+            M_WriteText(SCREENWIDTH - M_StringWidth(string)/2, y, string);
             y += _g->hu_font[0]->height;
             if ((*p = c))
                 p++;

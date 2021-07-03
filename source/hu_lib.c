@@ -143,7 +143,7 @@ void HUlib_drawTextLine
         else  if (c != ' ' && c >= l->sc && c <= '_')
         {
             w = l->f[c - l->sc]->width;
-            if (x+w > 240)
+            if (x+w > MAX_SCREENWIDTH)
                 break;
             // killough 1/18/98 -- support multiple lines:
             // CPhipps - patch drawing updated
@@ -153,7 +153,7 @@ void HUlib_drawTextLine
         else
         {
             x += 4;
-            if (x >= 240)
+            if (x >= MAX_SCREENWIDTH)
                 break;
         }
     }

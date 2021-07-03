@@ -262,7 +262,7 @@ static void AM_initVariables(void)
 static void AM_LevelInit(void)
 {
   _g->f_x = _g->f_y = 0;
-  _g->f_w = SCREENWIDTH*2;           // killough 2/7/98: get rid of finit_ vars
+  _g->f_w = MAX_SCREENWIDTH;           // killough 2/7/98: get rid of finit_ vars
   _g->f_h = SCREENHEIGHT-ST_SCALED_HEIGHT;// to allow runtime setting of width/height
 
   AM_findMinMaxBoundaries();

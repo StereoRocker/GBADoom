@@ -94,7 +94,7 @@ void R_DrawTranslatedColumn (const draw_column_vars_t *dcvars)
 	const byte *colormap = dcvars->colormap;
 	const byte *translation = dcvars->translation;
 
-    unsigned short* dest = drawvars.byte_topleft + (dcvars->yl*SCREENPITCH) + dcvars->x;
+    unsigned char* dest = drawvars.byte_topleft + (dcvars->yl*SCREENPITCH) + dcvars->x;
 
     const fixed_t		fracstep = dcvars->iscale;
     fixed_t frac = dcvars->texturemid + (dcvars->yl - centery)*fracstep;
@@ -113,9 +113,9 @@ void R_DrawTranslatedColumn (const draw_column_vars_t *dcvars)
 		//  used with PLAY sprites.
 		// Thus the "green" ramp of the player 0 sprite
 		//  is mapped to gray, red, black/indigo. 
-        unsigned short color = colormap[translation[source[frac>>FRACBITS]]];
+        unsigned char color = colormap[translation[source[frac>>FRACBITS]]];
 
-        *dest = (color | (color << 8));
+        *dest = color;
 		dest += sw;
 	
 		frac += fracstep;

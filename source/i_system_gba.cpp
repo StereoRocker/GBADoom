@@ -163,7 +163,7 @@ void I_ClearWindow_e32()
 
 extern uint8_t frame[];
 
-unsigned short* I_GetBackBuffer()
+unsigned char* I_GetBackBuffer()
 {
     /*
     if(REG_DISPCNT & DCNT_PAGE)
@@ -171,7 +171,7 @@ unsigned short* I_GetBackBuffer()
 
     return (unsigned short*)VID_PAGE2;
     */
-   return (unsigned short*)frame;
+   return (unsigned char*)frame;
 }
 
 //**************************************************************************************
