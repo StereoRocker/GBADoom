@@ -28,8 +28,8 @@
 
 ILI9341* display;
 
-// Keeping the framebuffer of 320*240 despite not running at that res now
-uint8_t frame[320*240];
+// Currently unable to go larger - E1M3 fails to load (ZMalloc fails to allocate 504 bytes) with 320x240px buffer
+uint8_t frame[240*160];
 uint16_t frame_palette[256];
 
 const int Y_OFFSET = ((240 - 160) / 2);
