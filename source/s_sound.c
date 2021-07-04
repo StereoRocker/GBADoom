@@ -48,6 +48,7 @@
 #include "lprintf.h"
 
 #include "global_data.h"
+#include "pwm_audio.h"
 
 // when to clip out sounds
 // Does not fit the large outdoor areas.
@@ -70,7 +71,7 @@
 
 
 // number of channels available
-static const unsigned int numChannels = 8;
+static const unsigned int numChannels = MAX_CHANNELS;
 
 //
 // Internals.
@@ -102,7 +103,7 @@ void S_Init(int sfxVolume, int musicVolume)
         // (the maximum numer of sounds rendered
         // simultaneously) within zone memory.
         // CPhipps - calloc
-        _g->channels =
+        _g->channels = 
                 (channel_t *) calloc(numChannels,sizeof(channel_t));
     }
 
@@ -121,9 +122,16 @@ void S_Stop(void)
 
     //jff 1/22/98 skip sound init if sound not enabled
     if (!nosfxparm)
-        for (cnum=0 ; cnum<numChannels ; cnum++)
+    {
+        for (cnum = 0; cnum < numChannels; cnum++)
+        {
             if (_g->channels[cnum].sfxinfo)
+            {
                 S_StopChannel(cnum);
+            }
+        }
+        muteSound();
+    }
 }
 
 //
@@ -335,7 +343,7 @@ static boolean S_SoundIsPlaying(int cnum)
     {
         int ticknow = _g->gametic;
 
-        return (channel->tickend < ticknow);
+        return (channel->tickend >= ticknow);
     }
 
     return false;
@@ -486,6 +494,8 @@ void S_StopChannel(int cnum)
         c->sfxinfo = 0;
         c->tickend = 0;
     }
+    soundChannels[cnum].volume = 0;
+    soundChannels[cnum].lump = NULL;
 }
 
 //
@@ -497,7 +507,7 @@ void S_StopChannel(int cnum)
 
 int S_AdjustSoundParams(mobj_t *listener, mobj_t *source, int *vol, int *sep)
 {
-	fixed_t adx, ady,approx_dist;
+	fixed_t adx, ady, approx_dist;
 
 	//jff 1/22/98 return if sound is not enabled
 	if (nosfxparm)

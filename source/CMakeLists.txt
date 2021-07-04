@@ -106,6 +106,9 @@ target_link_libraries(picodoom pico_stdlib)
 target_link_libraries(picodoom
         hardware_spi
         hardware_adc
+        hardware_clocks
+        hardware_pwm
+        hardware_irq
         )
 
 pico_add_extra_outputs(picodoom)

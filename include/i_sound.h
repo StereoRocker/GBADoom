@@ -86,7 +86,7 @@ typedef struct
 } channel_info_t;
 
 #define MUSIC_BUFFER_SAMPLES 2048
-#define MAX_CHANNELS    8
+//#define MAX_CHANNELS    8
 
 
 #endif

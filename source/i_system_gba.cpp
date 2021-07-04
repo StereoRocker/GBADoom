@@ -110,14 +110,15 @@ void I_StartWServEvents_e32()
 
 void I_PollWServEvents_e32()
 {
+    static bool pl = false, pr = false, pu = false, pd = false, pf = false, ps = false;
     bool left, right, up, down, fire, sel;
 
-    adc_select_input(ADC_AX);
-    uint adc_x_raw = adc_read();
+    //adc_select_input(ADC_AX);
+    uint adc_x_raw = 1500; //adc_read();
     adc_select_input(ADC_AY);
     uint adc_y_raw = adc_read();
 
-    fire = !gpio_get(PIN_FIRE);
+    //fire = !gpio_get(PIN_FIRE);
     sel = !gpio_get(PIN_SEL);
 
     left = (adc_x_raw < 600);
@@ -143,13 +144,21 @@ void I_PollWServEvents_e32()
     ev.type = right ? ev_keydown : ev_keyup;
     D_PostEvent(&ev);
 
-    ev.data1 = KEYD_B;
-    ev.type = fire ? ev_keydown : ev_keyup;
-    D_PostEvent(&ev);
+    if (pf != fire)
+    {
+        ev.data1 = KEYD_B;
+        ev.type = fire ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        pf = fire;
+    }
 
-    ev.data1 = KEYD_A;
-    ev.type = sel ? ev_keydown : ev_keyup;
-    D_PostEvent(&ev);
+    if (ps != sel)
+    {
+        ev.data1 = KEYD_A;
+        ev.type = sel ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        ps = sel;
+    }
 }
 
 //**************************************************************************************
