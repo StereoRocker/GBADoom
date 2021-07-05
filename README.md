@@ -34,21 +34,21 @@ This port is derived from [doomhack's GBADoom](https://github.com/doomhack/GBADo
 
 
 ## Cheats:
-~**Chainsaw:** L, UP, UP, LEFT, L, SELECT, SELECT, UP  ~
-~**God mode:** UP, UP, DOWN, DOWN, LEFT, LEFT, RIGHT, RIGHT  ~
-~**Ammo & Keys:** L, LEFT, R, RIGHT, SELECT,UP, SELECT, UP  ~
-~**Ammo:** R, R, SELECT,R, SELECT,UP, UP, LEFT  ~
-~**No Clipping:** UP, DOWN, LEFT, RIGHT, UP, DOWN, LEFT, RIGHT  ~
-~**Invincibility:** A, B, L, R, L, R, SELECT, SELECT  ~
-~**Berserk:** B, B, R, UP, A, A, R, B  ~
-~**Invisibility:** A, A, SELECT,B, A, SELECT, L, B  ~
-~**Auto-map:** L, SELECT,R, B, A, R, L, UP  ~
-~**Lite-Amp Goggles:** DOWN,LEFT, R, LEFT, R, L, L, SELECT  ~
-~**Exit Level:** LEFT,R, LEFT, L, B, LEFT, RIGHT, A  ~
-~**Enemy Rockets (Goldeneye):** A, B, L, R, R, L, B, A  ~
-~**Toggle FPS counter:** A, B, L, UP, DOWN, B, LEFT, LEFT  ~
+~~**Chainsaw:** L, UP, UP, LEFT, L, SELECT, SELECT, UP  ~~
+~~**God mode:** UP, UP, DOWN, DOWN, LEFT, LEFT, RIGHT, RIGHT  ~~
+~~**Ammo & Keys:** L, LEFT, R, RIGHT, SELECT,UP, SELECT, UP  ~~
+~~**Ammo:** R, R, SELECT,R, SELECT,UP, UP, LEFT  ~~
+~~**No Clipping:** UP, DOWN, LEFT, RIGHT, UP, DOWN, LEFT, RIGHT  ~~
+~~**Invincibility:** A, B, L, R, L, R, SELECT, SELECT  ~~
+~~**Berserk:** B, B, R, UP, A, A, R, B  ~~
+~~**Invisibility:** A, A, SELECT,B, A, SELECT, L, B  ~~
+~~**Auto-map:** L, SELECT,R, B, A, R, L, UP  ~~
+~~**Lite-Amp Goggles:** DOWN,LEFT, R, LEFT, R, L, L, SELECT  ~~
+~~**Exit Level:** LEFT,R, LEFT, L, B, LEFT, RIGHT, A  ~~
+~~**Enemy Rockets (Goldeneye):** A, B, L, R, R, L, B, A  ~~
+~~**Toggle FPS counter:** A, B, L, UP, DOWN, B, LEFT, LEFT  ~~
 
-To be updated when controls exist.
+Controls do now exist, however, the SELECT button isn't implemented. Cheats where this isn't required, probably work.
 
 ## Controls:  
 
@@ -56,6 +56,12 @@ I built a "controller" specifically for this. 8 buttons map to the D-Pad, A, B, 
 
 ## Building:
 
-TBC. Right now I'm using Visual Studio Code, the built-in debugging support via a Picoprobe is pretty awesome.
+```mkdir build
+cd build
+cmake ..
+make
+```
 
-Theoretically I should have a CMake file here in the root. For now, open VSCode on the source directory. Cleaning the build system will be completed later.
+Optionally, add `-j<num>` to the `make` command to enable multi-processing. Replacing `<num>` with the number of cores your system has is a good start.
+
+I have also left some useful Visual Studio Code specific files in the repo. If you open Visual Studio Code on the root directory, you should find yourself in a good position to build the main project and also debug with a picoprobe.

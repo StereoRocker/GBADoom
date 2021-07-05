@@ -1,0 +1,25 @@
+{
+  "cmake.configureOnOpen": false,
+  "cmake.statusbar.advanced": {
+    "debug" : {
+      "visibility": "hidden"
+              },    "launch" : {
+      "visibility": "hidden"
+               },
+    "build" : {
+      "visibility": "default"
+               },
+    "buildTarget" : {
+      "visibility": "hidden"
+               },
+    },
+    "files.associations": {
+      "cstdio": "cpp",
+      "fstream": "cpp",
+      "pico.h": "c",
+      "printf.h": "c"
+    },
+    "licenser.license": "BSD3",
+    "licenser.projectName": "FBConsole",
+    "cmake.configureArgs": ["-DPICO_BOARD=pimoroni_tiny2040"],
+}
