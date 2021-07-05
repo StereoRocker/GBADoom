@@ -97,52 +97,111 @@ void I_StartWServEvents_e32()
 
 //**************************************************************************************
 
-#include "hardware/adc.h"
+#include "pico/stdlib.h"
 
-#define ADC_AX   0
-#define PIN_AX   26
+#define SHIFT_CLK 28
+#define SHIFT_DAT 27
+#define INPUT_DAT 26
 
-#define ADC_AY   1
-#define PIN_AY   27
+#define BTN_UP    0x08
+#define BTN_DOWN  0x04
+#define BTN_LEFT  0x01
+#define BTN_RIGHT 0x02
 
-#define PIN_SEL  28
-#define PIN_FIRE 29
+#define BTN_SL    0x20
+#define BTN_SR    0x10
+#define BTN_FIRE  0x40
+#define BTN_SEL   0x80
+
+// Reads the value of 8 inputs by pushing a high pin, then 7 low pins, sampling after each one
+uint8_t shift_read()
+{
+    // Clock low
+    // Shift data high
+    // Clock high
+    // Wait
+    // Clock low
+    // Shift data low
+    // Read bit
+    // Repeat 7 times:
+    // - Clock high
+    // - Wait
+    // - Clock low
+    // - Read bit
+    uint8_t result = 0;
+
+    gpio_put(SHIFT_CLK, 0);
+    gpio_put(SHIFT_DAT, 1);
+    sleep_us(1);
+    gpio_put(SHIFT_CLK, 1);
+    sleep_us(1);
+    gpio_put(SHIFT_CLK, 0);
+    gpio_put(SHIFT_DAT, 0);
+    result = gpio_get(INPUT_DAT);
+    for (int i = 0; i < 7; i++)
+    {
+        gpio_put(SHIFT_CLK, 1);
+        sleep_us(1);
+        gpio_put(SHIFT_CLK, 0);
+        sleep_us(1);
+        result = (result << 1) + gpio_get(INPUT_DAT);
+    }
+
+    return result;
+}
+
 
 void I_PollWServEvents_e32()
 {
-    static bool pl = false, pr = false, pu = false, pd = false, pf = false, ps = false;
-    bool left, right, up, down, fire, sel;
+    static bool pl = false, pr = false, pu = false, pd = false, pf = false, ps = false, psl = false, psr = false;
+    bool left, right, up, down, fire, sel, strafe_left, strafe_right;
 
-    //adc_select_input(ADC_AX);
-    uint adc_x_raw = 1500; //adc_read();
-    adc_select_input(ADC_AY);
-    uint adc_y_raw = adc_read();
+    uint8_t buttons = shift_read();
 
-    //fire = !gpio_get(PIN_FIRE);
-    sel = !gpio_get(PIN_SEL);
+    up = buttons & BTN_UP;
+    down = buttons & BTN_DOWN;
+    left = buttons & BTN_LEFT;
+    right = buttons & BTN_RIGHT;
 
-    left = (adc_x_raw < 600);
-    right = (adc_x_raw > 4000);
-    up = (adc_y_raw > 4000);
-    down = (adc_y_raw < 600);
+    fire = buttons & BTN_FIRE;
+    sel = buttons & BTN_SEL;
+    strafe_left = buttons & BTN_SL;
+    strafe_right = buttons & BTN_SR;
+    
 
     event_t ev;
 
-    ev.data1 = KEYD_UP;
-    ev.type = up ? ev_keydown : ev_keyup;
-    D_PostEvent(&ev);
+    if (pu != up)
+    {
+        ev.data1 = KEYD_UP;
+        ev.type = up ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        pu = up;
+    }
 
-    ev.data1 = KEYD_DOWN;
-    ev.type = down ? ev_keydown : ev_keyup;
-    D_PostEvent(&ev);
+    if (pd != down)
+    {
+        ev.data1 = KEYD_DOWN;
+        ev.type = down ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        pd = down;
+    }
 
-    ev.data1 = KEYD_LEFT;
-    ev.type = left ? ev_keydown : ev_keyup;
-    D_PostEvent(&ev);
+    if (pl != left)
+    {
+        ev.data1 = KEYD_LEFT;
+        ev.type = left ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        pl = left;
+    }
 
-    ev.data1 = KEYD_RIGHT;
-    ev.type = right ? ev_keydown : ev_keyup;
-    D_PostEvent(&ev);
+    if (pr != right)
+    {
+        ev.data1 = KEYD_RIGHT;
+        ev.type = right ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        pr = right;
+    }
 
     if (pf != fire)
     {
@@ -158,6 +217,22 @@ void I_PollWServEvents_e32()
         ev.type = sel ? ev_keydown : ev_keyup;
         D_PostEvent(&ev);
         ps = sel;
+    }
+
+    if (psl != strafe_left)
+    {
+        ev.data1 = KEYD_L;
+        ev.type = strafe_left ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        psl = strafe_left;
+    }
+
+    if (psr != strafe_right)
+    {
+        ev.data1 = KEYD_R;
+        ev.type = strafe_right ? ev_keydown : ev_keyup;
+        D_PostEvent(&ev);
+        psr = strafe_right;
     }
 }
 

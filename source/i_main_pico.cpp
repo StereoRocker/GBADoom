@@ -120,14 +120,52 @@ void render_fb(void)
     }
 }
 
-#define ADC_AX   0
-#define PIN_AX   26
+#define SHIFT_CLK 28
+#define SHIFT_DAT 27
+#define INPUT_DAT 26
 
-#define ADC_AY   1
-#define PIN_AY   27
+// Resets the contents of the shift register to low on all pins by pushing low 8 times
+void shift_reset()
+{
+    // Shift data low
+    // Shift clock low
+    // Repeat 8 times:
+    // - Clock high
+    // - Wait
+    // - Clock low
+    gpio_put(SHIFT_DAT, 0);
+    gpio_put(SHIFT_CLK, 0);
+    for (int i = 0; i < 8; i++)
+    {
+        gpio_put(SHIFT_CLK, 1);
+        sleep_us(1);
+        gpio_put(SHIFT_CLK, 0);
+        sleep_us(1);
+    }
+}
 
-#define PIN_SEL  28
-#define PIN_FIRE 29
+// Initialises GPIO pins for shift register input
+void shift_init()
+{
+    // Initialise all SDK-provided stdio drivers
+    stdio_init_all();
+
+    // Initialise shift register clock & data pins, set both low
+    gpio_init(SHIFT_CLK);
+    gpio_init(SHIFT_DAT);
+    gpio_set_dir(SHIFT_CLK, GPIO_OUT);
+    gpio_set_dir(SHIFT_DAT, GPIO_OUT);
+    gpio_put(SHIFT_CLK, 0);
+    gpio_put(SHIFT_DAT, 0);
+
+    // Initialise button input pin with pulldown resistor
+    gpio_init(INPUT_DAT);
+    gpio_set_dir(INPUT_DAT, GPIO_IN);
+    gpio_pull_down(INPUT_DAT);
+
+    // Reset shift register contents
+    shift_reset();
+}
 
 #define PLL_SYS_KHZ (176 * 1000)
 
@@ -206,17 +244,7 @@ int main()
     memset(frame, 0, 240*160);
 
     // Set up controls
-    adc_init();
-    //adc_gpio_init(PIN_AX);
-    adc_gpio_init(PIN_AY);
-
-    gpio_init(PIN_SEL);
-    gpio_pull_up(PIN_SEL);
-    gpio_set_dir(PIN_SEL, GPIO_IN);
-
-    /*gpio_init(PIN_FIRE);
-    gpio_pull_up(PIN_FIRE);
-    gpio_set_dir(PIN_FIRE, GPIO_IN);*/
+    shift_init();
 
     c_main(frame);
     
