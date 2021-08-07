@@ -78,4 +78,8 @@ make
 
 Optionally, add `-j<num>` to the `make` command to enable multi-processing. Replacing `<num>` with the number of cores your system has is a good start.
 
-I have also left some useful Visual Studio Code specific files in the repo. If you open Visual Studio Code on the root directory, you should find yourself in a good position to build the main project and also debug with a picoprobe.
+## Debugging:
+
+The build may be switched to an SDL2-based debug mode - right now this is done by changing CMakeLists.txt (see the file contents). While it is described as a Linux platform, and is written + tested on such, it's entirely possible that this configuration would run on other platforms supported by SDL2 (Windows, Mac, etc.) with minimal changes. I foresee only needing to support CMake finding the SDL2 libraries on your chosen platform.
+
+I have also left some useful Visual Studio Code specific files in the repo. If you open Visual Studio Code on the root directory, you should find yourself in a good position to build the main project and also debug live on an RP2040-based board with a picoprobe.

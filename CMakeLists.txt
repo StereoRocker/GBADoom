@@ -1,8 +1,8 @@
 # StereoRocker: Edited to allow for building on Linux w/SDL
 # TODO: Automate this somehow.
 # NOTE: The "LINUX" build will probably work for other OS's too, it just needs to find SDL2.
-set (PICO 0)
-set (LINUX 1)
+set (PICO 1)
+set (LINUX 0)
 
 # Generated Cmake Pico project file
 
