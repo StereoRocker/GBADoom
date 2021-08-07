@@ -37,6 +37,21 @@
 #include "config.h"
 #endif
 
+#if LINUX == 1
+#include <stdint.h>
+#include <ctype.h>
+
+void strupr(char* str)
+{
+    while (*str)
+    {
+        *str = toupper(*str);
+        str++;
+    }
+}
+
+#endif
+
 #include <math.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

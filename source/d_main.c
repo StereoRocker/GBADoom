@@ -36,7 +36,7 @@
  */
 
 
-
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -633,6 +633,40 @@ static void IdentifyVersion()
     }
 }
 
+static void IwadSetup()
+{
+  #if PICO == 1
+  // Nothing to do, the Pico has the IWAD burned into flash memory and is already memory mapped
+  return;
+  #endif
+
+  #if LINUX == 1
+  // Read a file named "PICODOOM.WAD" into memory
+
+  // Open the file
+  FILE* f = fopen("PICODOOM.WAD", "rb");
+
+  // Check it didn't fail
+  if (f == NULL)
+  {
+    I_Error("Couldn't open PICODOOM.WAD");
+  }
+
+  // Get the length of the file and record it
+  fseek(f, 0L, SEEK_END);
+  doom_iwad_len = ftell(f);
+
+  // Seek back to the beginning, read the entire file into RAM
+  fseek(f, 0L, SEEK_SET);
+  doom_iwad = malloc(doom_iwad_len);
+  fread(doom_iwad, doom_iwad_len, 1, f);
+
+  // Close the file
+  fclose(f);
+
+  #endif
+}
+
 //
 // D_DoomMainSetup
 //
@@ -641,6 +675,8 @@ static void IdentifyVersion()
 
 static void D_DoomMainSetup(void)
 {
+    IwadSetup();
+
     IdentifyVersion();
 
     // jff 1/24/98 end of set to both working and command line value

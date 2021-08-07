@@ -7,6 +7,8 @@
 //#include "iwad/plutonia.c"
 //#include "iwad/sigil.c"
 
+#if PICO == 1
+
 #include "pico/stdlib.h"
 
 #include "doom_iwad.h"
@@ -17,3 +19,11 @@ const unsigned char* doom_iwad = (const unsigned char*)(XIP_BASE + (2 * 1024 * 1
 //const unsigned int doom_iwad_len = 3842044UL;
 const unsigned int doom_iwad_len = 4324136UL;
 
+#endif
+
+#if LINUX == 1
+
+unsigned char* doom_iwad;
+unsigned int doom_iwad_len;
+
+#endif

@@ -66,7 +66,9 @@
 #include "gba_functions.h"
 
 
+#if PICO == 1
 #include "pico/stdlib.h"
+#endif
 
 //#define static
 
@@ -1213,13 +1215,7 @@ static void R_DrawMasked(void)
 
 inline static void R_DrawSpanPixel(pixel* dest, const byte* source, const byte* colormap, unsigned int position)
 {
-#ifdef __arm__
     *dest = colormap[source[((position >> 4) & 0x0fc0) | (position >> 26)]];
-#else
-    unsigned int color = colormap[source[((position >> 4) & 0x0fc0) | (position >> 26)]];
-
-    *dest = (color | (color << 8));
-#endif
 }
 
 static void R_DrawSpan(unsigned int y, unsigned int x1, unsigned int x2, const draw_span_vars_t *dsvars)

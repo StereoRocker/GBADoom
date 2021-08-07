@@ -60,6 +60,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 /* Most of the following has been rewritten by Lee Killough
  *

@@ -3,6 +3,8 @@
 
 #define MAX_CHANNELS 8
 
+#include <stdint.h>
+
 typedef struct
 {
     uint16_t lastAudioBufferIdx;

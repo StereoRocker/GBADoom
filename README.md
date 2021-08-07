@@ -26,6 +26,8 @@ This port is derived from [doomhack's GBADoom](https://github.com/doomhack/GBADo
 
 - Only running at 240x160px. I'd like to see this increase to 320x240px. Right now, the increased framebuffer size causes failures 
 
+- Hardfaults when loading E1M5 in the Shareware WAD.
+
 - ~General optimisation. We're never going to get a perfect 35FPS but I think there is still another 25% left without changing the visual quality/correctness/game behaviour. For reference, the first time I ran a build under the emulator it ran at about 3FPS.~ The RP2040 is significantly faster than a GBA, the limiting factor is by far going to be the display I choose to target.
 
 - Although it is based on prBoom, most of the engine enhancements (dehacked, limit removing etc) have been reverted back to Vanilla. This is either for memory or performance reasons. Sadly, NUTS.wad and Okuplok are right out!
