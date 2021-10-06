@@ -28,6 +28,9 @@ if (PICO)
         # Do not panic on OOM
         add_definitions(-DPICO_MALLOC_PANIC=0)
 
+        # Set a definition so we know this is a pico build
+        add_definitions(-DPICO=1)
+
         # Include the includes!
         include_directories(include)
 
