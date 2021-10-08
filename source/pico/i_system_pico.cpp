@@ -116,17 +116,15 @@ void I_PollWServEvents_e32()
     static bool pl = false, pr = false, pu = false, pd = false, pf = false, ps = false, psl = false, psr = false;
     bool left, right, up, down, fire, sel, strafe_left, strafe_right;
 
-    uint8_t buttons = shift_read();
+    up = !gpio_get(PICOSYSTEM_SW_UP_PIN);
+    down = !gpio_get(PICOSYSTEM_SW_DOWN_PIN);
+    left = !gpio_get(PICOSYSTEM_SW_LEFT_PIN);
+    right = !gpio_get(PICOSYSTEM_SW_RIGHT_PIN);
 
-    up = buttons & BTN_UP;
-    down = buttons & BTN_DOWN;
-    left = buttons & BTN_LEFT;
-    right = buttons & BTN_RIGHT;
-
-    fire = buttons & BTN_FIRE;
-    sel = buttons & BTN_SEL;
-    strafe_left = buttons & BTN_SL;
-    strafe_right = buttons & BTN_SR;
+    fire = !gpio_get(PICOSYSTEM_SW_A_PIN);
+    sel = !gpio_get(PICOSYSTEM_SW_B_PIN);
+    strafe_left = !gpio_get(PICOSYSTEM_SW_Y_PIN);
+    strafe_right = !gpio_get(PICOSYSTEM_SW_X_PIN);
     
 
     event_t ev;
@@ -249,8 +247,8 @@ void I_SetPallete_e32(const byte* pallete)
         byte b = *pallete++;
 
         frame_palette[i] = ((r & 0xf8) << 8 | (g & 0xfc) << 3 | b >> 3);
-        uint8_t color_big[2] = {(uint8_t)(frame_palette[i] >> 8), (uint8_t)(frame_palette[i] & 0xFF)};
-        frame_palette[i] = *(uint16_t*)(color_big);
+        //uint8_t color_big[2] = {(uint8_t)(frame_palette[i] >> 8), (uint8_t)(frame_palette[i] & 0xFF)};
+        //frame_palette[i] = *(uint16_t*)(color_big);
     }
 }
 

@@ -10,7 +10,7 @@
 #include "pico/stdlib.h"
 #include "pico/stdio.h"
 
-#include "ili9341.hpp"
+#include "pico/st7789.h"
 
 #include "hardware/adc.h"
 #include "hardware/clocks.h"
@@ -27,8 +27,6 @@ extern "C" {
 extern "C" {
 volatile soundChannel_t soundChannels[MAX_CHANNELS];
 }
-
-#define AUDIO_PIN 29
 
 /*
  * PWM Interrupt Handler which outputs PWM level and advances the 
@@ -60,8 +58,8 @@ void pwm_interrupt_handler() {
         }
     }
 
-    pwm_clear_irq(pwm_gpio_to_slice_num(AUDIO_PIN));
-    pwm_set_gpio_level(AUDIO_PIN, (pwm>>3)&0xFF);
+    pwm_clear_irq(pwm_gpio_to_slice_num(PICOSYSTEM_AUDIO_PIN));
+    pwm_set_gpio_level(PICOSYSTEM_AUDIO_PIN, (pwm>>3)&0xFF);
 }
 
 /**
@@ -77,26 +75,24 @@ extern "C" void muteSound()
 }
 
 
-// ILI9341 pin definitions:
-// We are going to use SPI 0, and allocate it to the following GPIO pins.
-// Pins can be changed, see the GPIO function select table in the datasheet
-// for information on GPIO assignments.
-#define SPI_PORT spi0
-#define PIN_MISO 4
-#define PIN_SCK  2
-#define PIN_MOSI 3
-#define PIN_CS   5
-#define PIN_DC   6
-#define PIN_RST  7
-
-ILI9341* display;
+// lcd configuration
+const struct st7789_config lcd_config = {
+    .spi      = spi0,
+    .gpio_din = PICOSYSTEM_LCD_MOSI_PIN,
+    .gpio_clk = PICOSYSTEM_LCD_SCLK_PIN,
+    .gpio_cs  = PICOSYSTEM_LCD_CSN_PIN,
+    .gpio_dc  = PICOSYSTEM_LCD_DC_PIN,
+    .gpio_rst = PICOSYSTEM_LCD_RESET_PIN,
+    .gpio_bl  = PICOSYSTEM_BACKLIGHT_PIN,
+};
 
 // Currently unable to go larger - E1M3 fails to load (ZMalloc fails to allocate 504 bytes) with 320x240px buffer
 uint8_t frame[240*160];
 uint16_t frame_palette[256];
 
+// Picosystem display is 240x240px
 const int Y_OFFSET = ((240 - 160) / 2);
-const int X_OFFSET = ((320 - 240) / 2);
+const int X_OFFSET = 0;
 const int X_LIMIT  = (X_OFFSET + 239);
 
 extern "C" void c_main(uint8_t* fb);
@@ -105,6 +101,11 @@ void render_fb(void)
 {
     // Here's hoping the stack has 480 bytes free for me lmao
     uint16_t line[240];
+
+    // Set up the LCD
+    st7789_set_cursor(X_OFFSET, Y_OFFSET);
+
+
 
     // For each line
     for (int i = 0; i < 160; i++)
@@ -116,55 +117,11 @@ void render_fb(void)
         }
 
         // Output the line to display
-        display->plot_block(X_OFFSET , i+Y_OFFSET, X_LIMIT, i+Y_OFFSET+1, line, 240);
+        st7789_write(line, 480);
+
+        // Output the line to display
+        //display->plot_block(X_OFFSET , i+Y_OFFSET, X_LIMIT, i+Y_OFFSET+1, line, 240);
     }
-}
-
-#define SHIFT_CLK 28
-#define SHIFT_DAT 27
-#define INPUT_DAT 26
-
-// Resets the contents of the shift register to low on all pins by pushing low 8 times
-void shift_reset()
-{
-    // Shift data low
-    // Shift clock low
-    // Repeat 8 times:
-    // - Clock high
-    // - Wait
-    // - Clock low
-    gpio_put(SHIFT_DAT, 0);
-    gpio_put(SHIFT_CLK, 0);
-    for (int i = 0; i < 8; i++)
-    {
-        gpio_put(SHIFT_CLK, 1);
-        sleep_us(1);
-        gpio_put(SHIFT_CLK, 0);
-        sleep_us(1);
-    }
-}
-
-// Initialises GPIO pins for shift register input
-void shift_init()
-{
-    // Initialise all SDK-provided stdio drivers
-    stdio_init_all();
-
-    // Initialise shift register clock & data pins, set both low
-    gpio_init(SHIFT_CLK);
-    gpio_init(SHIFT_DAT);
-    gpio_set_dir(SHIFT_CLK, GPIO_OUT);
-    gpio_set_dir(SHIFT_DAT, GPIO_OUT);
-    gpio_put(SHIFT_CLK, 0);
-    gpio_put(SHIFT_DAT, 0);
-
-    // Initialise button input pin with pulldown resistor
-    gpio_init(INPUT_DAT);
-    gpio_set_dir(INPUT_DAT, GPIO_IN);
-    gpio_pull_down(INPUT_DAT);
-
-    // Reset shift register contents
-    shift_reset();
 }
 
 #define PLL_SYS_KHZ (176 * 1000)
@@ -173,6 +130,7 @@ extern char __flash_binary_end;
 
 int main()
 {
+    #if 0
     // Overclock to 176MHz
     set_sys_clock_khz(PLL_SYS_KHZ, true); 
 
@@ -185,6 +143,7 @@ int main()
         PLL_SYS_KHZ * 1000,                               // Input frequency
         PLL_SYS_KHZ * 1000                                // Output (must be same as no divider)
     );
+    #endif
 
     // Set all pins high, to avoid chip selecting an incorrect device
     for (int pin = 0; pin < 29; pin++)
@@ -193,6 +152,7 @@ int main()
         gpio_set_dir(pin, GPIO_OUT);
         gpio_put(pin, 1);
     }
+    
 
     // Init audio
 
@@ -200,9 +160,8 @@ int main()
     //memset(audioBuffer, 0, AUDIO_BUF_LEN);    // Clear buffer
     memset((void*)soundChannels, 0, sizeof(soundChannels));
 
-    
-    gpio_set_function(AUDIO_PIN, GPIO_FUNC_PWM);
-    int audio_pin_slice = pwm_gpio_to_slice_num(AUDIO_PIN);
+    gpio_set_function(PICOSYSTEM_AUDIO_PIN, GPIO_FUNC_PWM);
+    int audio_pin_slice = pwm_gpio_to_slice_num(PICOSYSTEM_AUDIO_PIN);
 
     
     // Setup PWM interrupt to fire when PWM cycle is complete
@@ -231,30 +190,35 @@ int main()
     pwm_config_set_wrap(&config, 250); 
     pwm_init(audio_pin_slice, &config, true);
 
-    pwm_set_gpio_level(AUDIO_PIN, 0);
-    
+    pwm_set_gpio_level(PICOSYSTEM_AUDIO_PIN, 0);
+
     // Initialise all SDK-provided stdio drivers
     stdio_init_all();
-
-    // Output details on binary
-    printf("\n\n####################\nBinary end: %x\n####################\n\n", ((uintptr_t) &__flash_binary_end));
+    
+    printf("Set up PWM\n");
 
     // Initialise ILI9341 display
-    display = new ILI9341(SPI_PORT, PIN_MISO, PIN_MOSI, PIN_SCK,
-                            PIN_CS, PIN_DC, PIN_RST,
-                            320, 240, 90,
-                            62.5 * 1000 * 1000);
+    st7789_init(&lcd_config, 240, 240);
+    st7789_fill(0x0000);
+    printf("Initialised st7789\n");
 
     // Set up static framebuffer
     memset(frame, 0, 240*160);
 
-    // Set up controls
-    shift_init();
+    
+
+    // Output details on binary
+    printf("\n\n####################\nBinary end: %x\n####################\n\n", ((uintptr_t) &__flash_binary_end));
 
     c_main(frame);
     
-
+    while (1)
+    {
+        printf("Reached end\n");
+        sleep_ms(1000);
+    }
     // Break, and halt execution
+    for(;;);
     __breakpoint();
     for(;;);
     return 0;

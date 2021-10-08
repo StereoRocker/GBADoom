@@ -54,7 +54,7 @@ if (PICO)
         pico_set_program_version(picodoom "0.1")
 
         pico_enable_stdio_uart(picodoom 1)
-        pico_enable_stdio_usb(picodoom 0)
+        pico_enable_stdio_usb(picodoom 1)
 
         # Add the standard library to the build
         target_link_libraries(picodoom pico_stdlib)
