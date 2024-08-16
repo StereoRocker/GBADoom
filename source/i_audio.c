@@ -104,7 +104,7 @@ int I_StartSound(int id, int channel, int vol, int sep)
     int lumpNum = W_CheckNumForName(soundbuf);
     if (lumpNum == -1)
     {
-        printf("I_StartSound: Failed to find %s\n", S_sfx[id].name);
+        printf("I_StartSound: Failed to find %s\n", soundbuf);
         return -1;
     }
     const void *lumpPtr = W_CacheLumpNum(lumpNum);
